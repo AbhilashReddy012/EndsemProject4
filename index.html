@@ -1,1 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Explorer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <!-- SEARCH BLOCK -->
+    <div class="search-area">
+        <h1>GitHub Explorer</h1>
+        <form id="form">
+            <input type="text" id="input" placeholder="Enter a username...." required />
+            <button>Search</button>
+        </form>
+    </div>
+
+    <!-- PROFILE BLOCK -->
+    <div id="profile-area" class="pcard hidden">
+        <img id="avatar-image" class="avatar" src="" alt="Profile Pic" />
+        <h2 id="user-display-name">Name</h2>
+        <p id="user-bio" class="bio">User Bio</p>
+        
+        <div class="stats-box">
+            <div>
+                <strong id="stat-repos">0</strong>
+                <p style="font-size: 11px; color: #888; margin-top: 5px;">Repos</p>
+            </div>
+            <div>
+                <strong id="stat-followers">0</strong>
+                <p style="font-size: 11px; color: #888; margin-top: 5px;">Followers</p>
+            </div>
+            <div>
+                <strong id="stat-following">0</strong>
+                <p style="font-size: 11px; color: #888; margin-top: 5px;">Following</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPOS LIST BLOCK -->
+    <div id="repos-area" class="repos-area hidden">
+        <h3 style="margin-bottom: 15px;">Repositories</h3>
+        <div id="repos-list">
+            <!-- Repos go here -->
+        </div>
+    </div>
+
+
+       <script  src="index.js"></script>
+</body>
+</html>
