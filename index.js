@@ -7,16 +7,23 @@ async function searchGitHubUser(username) {
     // Hide previous results
     document.getElementById("profile-area").classList.add("hidden");
     document.getElementById("repos-area").classList.add("hidden");
-
     try {
         // Fetch user profile data
         const userResponse = await fetch("https://api.github.com/users/" + username);
 
-        // If response is not OK, show native alert box and stop safely
-        if (userResponse.status !== 200) {
+        // Only a 404 means the username itself doesn't exist
+        if (userResponse.status === 404) {
             alert("Username not valid");
             document.getElementById("input").value = '';
-            return; 
+            return;
+        }
+
+        // Any other non-200 (e.g. 403 rate limit, 5xx server issue) is a different problem,
+        // not an invalid username — surface it so it isn't misdiagnosed
+        if (userResponse.status !== 200) {
+            const errorBody = await userResponse.json().catch(() => ({}));
+            alert(errorBody.message || ("GitHub API error: " + userResponse.status));
+            return;
         }
 
         // Save profile JSON
@@ -24,12 +31,16 @@ async function searchGitHubUser(username) {
 
         // Fetch repository list
         const reposResponse = await fetch("https://api.github.com/users/" + username + "/repos");
+        if (reposResponse.status !== 200) {
+            const errorBody = await reposResponse.json().catch(() => ({}));
+            alert(errorBody.message || ("GitHub API error: " + reposResponse.status));
+            return;
+        }
         reposData = await reposResponse.json();
 
         // Show populated HTML
         showProfile();
         showRepos();
-
     } catch (err) {
         console.error(err);
         alert("An error occurred while fetching data.");
@@ -44,7 +55,6 @@ function showProfile() {
     document.getElementById("stat-repos").innerText = profileData.public_repos;
     document.getElementById("stat-followers").innerText = profileData.followers;
     document.getElementById("stat-following").innerText = profileData.following;
-
     document.getElementById("profile-area").classList.remove("hidden");
 }
 
@@ -55,12 +65,10 @@ function showRepos() {
 
     // Display up to 5 repos safely
     const maxRepos = Math.min(5, reposData.length);
-    let combinedHTML = ""; 
-
+    let combinedHTML = "";
     for (let i = 0; i < maxRepos; i++) {
         const repo = reposData[i];
         const description = repo.description || "No description provided.";
-
         combinedHTML += `
             <div class="repo-item">
                 <a href="${repo.html_url}" target="_blank" class="repo-link">${repo.name}</a>
@@ -68,7 +76,6 @@ function showRepos() {
             </div>
         `;
     }
-
     // Single DOM update for better performance
     listContainer.innerHTML = combinedHTML;
     document.getElementById("repos-area").classList.remove("hidden");
