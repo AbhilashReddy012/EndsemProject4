@@ -7,7 +7,7 @@ let reposData = [];
 // needs no scope — auth alone raises the limit to 5,000/hr) and give it an
 // expiration date. Never paste a token with repo/admin/write scopes here.*/
 
-const GITHUB_TOKEN = "YOUR_GITHUB_TOKEN_HERE";
+const GITHUB_TOKEN = "null";
 const hasToken = GITHUB_TOKEN && GITHUB_TOKEN !== "YOUR_GITHUB_TOKEN_HERE";
 const githubHeaders = { Authorization: "Bearer " + GITHUB_TOKEN };
 
