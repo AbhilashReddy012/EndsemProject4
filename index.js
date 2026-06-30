@@ -2,10 +2,11 @@
 let profileData = null;
 let reposData = [];
 
-// ⚠️ SECURITY NOTE: this token is visible to anyone who opens devtools on the
+/*SECURITY NOTE: this token is visible to anyone who opens devtools on the
 // deployed site. Use a token with NO scopes checked (reading public data
 // needs no scope — auth alone raises the limit to 5,000/hr) and give it an
-// expiration date. Never paste a token with repo/admin/write scopes here.
+// expiration date. Never paste a token with repo/admin/write scopes here.*/
+
 const GITHUB_TOKEN = "YOUR_GITHUB_TOKEN_HERE";
 const hasToken = GITHUB_TOKEN && GITHUB_TOKEN !== "YOUR_GITHUB_TOKEN_HERE";
 const githubHeaders = { Authorization: "Bearer " + GITHUB_TOKEN };
@@ -20,6 +21,28 @@ async function githubFetch(url) {
         response = await fetch(url);
     }
     return response;
+}
+
+// Builds a human-readable rate-limit summary from a response's headers.
+// This is what actually proves whether the token is being applied: a limit
+// of 60 means you're still unauthenticated no matter what GITHUB_TOKEN says;
+// a limit of 5000 means the token is genuinely working.
+function describeRateLimit(headers) {
+    const limit = headers.get("X-RateLimit-Limit");
+    const remaining = headers.get("X-RateLimit-Remaining");
+    const reset = headers.get("X-RateLimit-Reset");
+    if (limit === null) return "";
+    const resetTime = reset ? new Date(parseInt(reset, 10) * 1000).toLocaleTimeString() : "unknown";
+    const tierNote = limit === "60"
+        ? " — this is the UNAUTHENTICATED tier, meaning the token in index.js is not being applied."
+        : " — this is the AUTHENTICATED tier, the token IS being applied.";
+    return "\n\nRate limit: " + remaining + "/" + limit + " remaining, resets at " + resetTime + "." + tierNote;
+}
+
+// One-time startup warning so it's obvious in the console whether a real
+// token was ever configured, instead of finding out only after a 403.
+if (!hasToken) {
+    console.warn("GITHUB_TOKEN is still the placeholder — every request is unauthenticated and capped at 60/hour.");
 }
 
 // Main function to search a user
@@ -39,10 +62,12 @@ async function searchGitHubUser(username) {
         }
 
         // Any other non-200 (e.g. 403 rate limit, 5xx server issue) is a different problem,
-        // not an invalid username — surface it so it isn't misdiagnosed
+        // not an invalid username — surface it, plus the actual rate-limit tier, so it's
+        // never ambiguous whether the token is doing anything
         if (userResponse.status !== 200) {
             const errorBody = await userResponse.json().catch(() => ({}));
-            alert(errorBody.message || ("GitHub API error: " + userResponse.status));
+            const baseMessage = errorBody.message || ("GitHub API error: " + userResponse.status);
+            alert(baseMessage + describeRateLimit(userResponse.headers));
             return;
         }
 
@@ -53,7 +78,8 @@ async function searchGitHubUser(username) {
         const reposResponse = await githubFetch("https://api.github.com/users/" + username + "/repos");
         if (reposResponse.status !== 200) {
             const errorBody = await reposResponse.json().catch(() => ({}));
-            alert(errorBody.message || ("GitHub API error: " + reposResponse.status));
+            const baseMessage = errorBody.message || ("GitHub API error: " + reposResponse.status);
+            alert(baseMessage + describeRateLimit(reposResponse.headers));
             return;
         }
         reposData = await reposResponse.json();
