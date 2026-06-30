@@ -2,7 +2,7 @@
 let profileData = null;
 let reposData = [];
 
-/*SECURITY NOTE: this token is visible to anyone who opens devtools on the
+//SECURITY NOTE: this token is visible to anyone who opens devtools on the
 // deployed site. Use a token with NO scopes checked (reading public data
 // needs no scope — auth alone raises the limit to 5,000/hr) and give it an
 // expiration date. Never paste a token with repo/admin/write scopes here.*/
