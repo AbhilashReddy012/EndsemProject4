@@ -63,10 +63,9 @@ function showRepos() {
     const listContainer = document.getElementById("repos-list");
     listContainer.innerHTML = ""; // Clear old repos
 
-    // Display up to 5 repos safely
-    const maxRepos = Math.min(5, reposData.length);
+    // Display ALL repos returned by the API (limit removed)
     let combinedHTML = "";
-    for (let i = 0; i < maxRepos; i++) {
+    for (let i = 0; i < reposData.length; i++) {
         const repo = reposData[i];
         const description = repo.description || "No description provided.";
         combinedHTML += `
