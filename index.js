@@ -85,5 +85,5 @@ document.getElementById("form").addEventListener("submit", function(e) {
 
 // Search for "abhilashreddy012" by default on initial start
 window.onload = function() {
-    searchGitHubUser("AbhilashReddy012");
+    searchGitHubUser("abhilashreddy012");
 };
