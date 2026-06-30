@@ -2,6 +2,18 @@
 let profileData = null;
 let reposData = [];
 
+/* SECURITY NOTE: This token is visible to anyone who opens devtools on the
+ deployed site. Only use a token with NO scopes checked (read-only public
+ data doesn't need any scope — auth alone raises the limit to 5,000/hr) and
+ set an expiration date when you generate it. Never use a token with repo,
+ admin, or write scopes here. */
+const GITHUB_TOKEN = "YOUR_GITHUB_TOKEN_HERE";
+
+// Shared headers for authenticated GitHub API requests
+const githubHeaders = {
+    Authorization: "Bearer " + GITHUB_TOKEN
+};
+
 // Main function to search a user
 async function searchGitHubUser(username) {
     // Hide previous results
@@ -9,7 +21,9 @@ async function searchGitHubUser(username) {
     document.getElementById("repos-area").classList.add("hidden");
     try {
         // Fetch user profile data
-        const userResponse = await fetch("https://api.github.com/users/" + username);
+        const userResponse = await fetch("https://api.github.com/users/" + username, {
+            headers: githubHeaders
+        });
 
         // Only a 404 means the username itself doesn't exist
         if (userResponse.status === 404) {
@@ -30,7 +44,9 @@ async function searchGitHubUser(username) {
         profileData = await userResponse.json();
 
         // Fetch repository list
-        const reposResponse = await fetch("https://api.github.com/users/" + username + "/repos");
+        const reposResponse = await fetch("https://api.github.com/users/" + username + "/repos", {
+            headers: githubHeaders
+        });
         if (reposResponse.status !== 200) {
             const errorBody = await reposResponse.json().catch(() => ({}));
             alert(errorBody.message || ("GitHub API error: " + reposResponse.status));
